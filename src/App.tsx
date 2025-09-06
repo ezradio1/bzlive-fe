@@ -16,9 +16,16 @@ function App() {
   const [tempo, setTempo] = useState(120);
   const [beatSide, setBeatSide] = useState("left");
   const [isPlaying, setIsPlaying] = useState(false);
+  const [timeSignature, setTimeSignature] = useState("4/4");
 
   useEffect(() => {
-    const ws = new WebSocket("ws://192.168.100.10:8080");
+    // Dynamically get the current host IP for WebSocket connection
+    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const host = window.location.hostname;
+    const port = 8080;
+    const wsUrl = `${protocol}://${host}:${port}`;
+
+    const ws = new WebSocket(wsUrl);
 
     ws.onopen = () => console.log("Connected to WebSocket server ✅");
 
@@ -29,8 +36,8 @@ function App() {
         setCurrentTime(msg.currentTime);
         setTempo(msg.tempo);
         setIsPlaying(msg.isPlaying);
-      } else if (msg.type === "markers") {
-        setMarkers(msg.markers);
+      } else if (msg.type === "time_signature") {
+        setTimeSignature(msg.timeSignature);
       }
     };
 
@@ -54,7 +61,10 @@ function App() {
   // Tentukan lagu sekarang
   const currentSongMarker = markers
     .filter((m) => m.isSongTitle)
-    .reduce<Marker | null>((prev, m) => (m.time <= currentTime ? m : prev), null);
+    .reduce<Marker | null>(
+      (prev, m) => (m.time <= currentTime ? m : prev),
+      null
+    );
 
   const currentSong = currentSongMarker
     ? currentSongMarker.name.replace("SONG:", "")
@@ -86,7 +96,12 @@ function App() {
       <div className="flex flex-col items-center justify-center flex-1 p-4 sm:p-8 overflow-hidden">
         <div className="w-full max-w-4xl bg-black/30 backdrop-blur-md rounded-3xl shadow-2xl p-6 sm:p-8 border border-white/20 overflow-hidden">
           <SongTitle currentSong={currentSong} />
-          <TempoDisplay tempo={tempo} beatSide={beatSide} isPlaying={isPlaying} />
+          <TempoDisplay
+            tempo={tempo}
+            beatSide={beatSide}
+            isPlaying={isPlaying}
+            timeSignature={timeSignature}
+          />
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
             <div className="scale-90">
               <MarkerCard

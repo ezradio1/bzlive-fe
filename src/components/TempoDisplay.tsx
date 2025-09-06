@@ -3,6 +3,7 @@ import { Chip } from "./Chip";
 interface TempoDisplayProps {
   tempo: number;
   beatSide: string;
+  timeSignature: string;
   isPlaying: boolean;
 }
 
@@ -10,13 +11,14 @@ export function TempoDisplay({
   tempo,
   beatSide,
   isPlaying,
+  timeSignature,
 }: TempoDisplayProps) {
   return (
     <div className="text-center mb-10">
       <div className="mb-6 flex justify-center">
-        <div className="flex flex-wrap gap-1">
+        <div className="flex flex-wrap gap-2 jusctify-center items-center">
           <Chip variant="emerald">{tempo.toFixed(1)} BPM</Chip>
-          <Chip variant="amber">4/4</Chip>
+          <Chip variant="amber">{timeSignature}</Chip>
         </div>
       </div>
       <div className="flex justify-center items-center space-x-6">
