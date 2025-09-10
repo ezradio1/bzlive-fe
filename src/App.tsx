@@ -16,10 +16,10 @@ function App() {
   const [tempo, setTempo] = useState(120);
   const [beatSide, setBeatSide] = useState("left");
   const [isPlaying, setIsPlaying] = useState(false);
-  const [timeSignature, setTimeSignature] = useState("4/4");
+  const [timeSignature, setTimeSignature] = useState("");
+  const [currentChord, setCurrentChord] = useState<string | null>(null);
 
   useEffect(() => {
-    // Dynamically get the current host IP for WebSocket connection
     const protocol = window.location.protocol === "https:" ? "wss" : "ws";
     const host = window.location.hostname;
     const port = 8080;
@@ -31,13 +31,17 @@ function App() {
 
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
+      console.log({ msg });
+
       if (msg.type === "update") {
         setMarkers(msg.markers);
         setCurrentTime(msg.currentTime);
         setTempo(msg.tempo);
         setIsPlaying(msg.isPlaying);
-      } else if (msg.type === "time_signature") {
         setTimeSignature(msg.timeSignature);
+
+        // chord dari backend langsung
+        if (msg.chord) setCurrentChord(msg.chord);
       }
     };
 
@@ -102,6 +106,15 @@ function App() {
             isPlaying={isPlaying}
             timeSignature={timeSignature}
           />
+
+          {/* Tambahan Chord */}
+          {currentChord && (
+            <div className="text-center my-4">
+              <p className="text-lg text-gray-300">Current Chord</p>
+              <h2 className="text-4xl font-bold">{currentChord}</h2>
+            </div>
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-center">
             <div className="scale-90">
               <MarkerCard
